@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI ChatBot - Premium Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dark-mode">
+    <div class="background-mesh"></div>
+    
+    <div class="app-container">
+        <!-- شريط المحادثات الجانبي -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <button id="newChatBtn" class="new-chat-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    محادثة جديدة
+                </button>
+            </div>
+            <div class="sidebar-content">
+                <div class="thread-group" id="pinnedThreadsGroup" style="display: none;">
+                    <h3>المثبتة 📌</h3>
+                    <ul class="thread-list" id="pinnedThreadsList"></ul>
+                </div>
+                <div class="thread-group">
+                    <h3>السابقة 🕒</h3>
+                    <ul class="thread-list" id="recentThreadsList"></ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- نافذة المحادثة -->
+        <div class="chat-container glass-panel">
+            <!-- Header -->
+            <header class="chat-header glass-panel">
+                <div class="header-info">
+                    <div class="avatar-container">
+                        <svg class="bot-avatar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 8V4H8"></path>
+                            <rect x="4" y="8" width="16" height="12" rx="2"></rect>
+                            <path d="M2 14h2"></path>
+                            <path d="M20 14h2"></path>
+                            <path d="M15 13v2"></path>
+                            <path d="M9 13v2"></path>
+                        </svg>
+                        <span class="status-dot"></span>
+                    </div>
+                    <div class="header-text">
+                        <h1 id="chatTitle">المساعد الذكي</h1>
+                        <p id="personaDescription">متصل وجاهز للمساعدة</p>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    <select id="personaSelect" class="persona-select">
+                        <option value="assistant" selected>مساعد رسمي</option>
+                        <option value="friend">صديق ودود</option>
+                        <option value="tech">خبير تقني</option>
+                        <option value="teacher">معلم صبور</option>
+                        <option value="writer">كاتب إبداعي</option>
+                    </select>
+
+                    <!-- Theme Picker (Feature 12) -->
+                    <div class="theme-picker" id="themePicker" title="اختر الثيم">
+                        <button class="theme-swatch active" data-t="midnight" title="Midnight Purple"></button>
+                        <button class="theme-swatch" data-t="ocean" title="Ocean Blue"></button>
+                        <button class="theme-swatch" data-t="sunset" title="Sunset Orange"></button>
+                        <button class="theme-swatch" data-t="forest" title="Forest Green"></button>
+                    </div>
+
+                    <button id="themeToggle" class="icon-btn" title="تبديل المظهر">
+                        <!-- Sun/Moon icon toggled via CSS -->
+                        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                    <button id="exportChatBtn" class="icon-btn" title="تصدير المحادثة (Markdown)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </button>
+                    <button id="clearChat" class="icon-btn" title="مسح المحادثة">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+            </header>
+
+        <!-- Chat Area -->
+        <main id="chatBox" class="chat-box glass-panel">
+            <div id="emptyState" class="empty-state">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <h2>أهلاً بك!</h2>
+                <p>أنا المساعد الذكي المدعوم بالذكاء الاصطناعي. كيف يمكنني مساعدتك اليوم؟</p>
+            </div>
+            <!-- Messages will be injected here -->
+        </main>
+
+        <!-- Input Area (Drag & Drop Zone) -->
+        <footer id="dropZone" class="input-area glass-panel">
+            <div id="filePreview" class="file-preview hidden">
+                <div class="preview-content">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                    <span id="fileName">document.pdf</span>
+                </div>
+                <button id="removeFile" class="icon-btn small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            
+            <!-- Slash Commands Popup (Feature 13) -->
+            <div id="slashCommands" class="slash-commands hidden">
+                <ul id="slashCommandsList"></ul>
+            </div>
+
+            <!-- Compare Mode Settings Bar -->
+            <div id="compareBar" class="compare-bar hidden">
+                <span class="compare-label">مقارنة بين:</span>
+                <select id="compareP1" class="compare-select">
+                    <option value="gemini">🟢 Gemini</option>
+                    <option value="openai">⚪ OpenAI</option>
+                    <option value="claude">🟠 Claude</option>
+                    <option value="ollama">🟣 Ollama</option>
+                </select>
+                <span class="compare-vs">vs</span>
+                <select id="compareP2" class="compare-select">
+                    <option value="openai">⚪ OpenAI</option>
+                    <option value="gemini">🟢 Gemini</option>
+                    <option value="claude">🟠 Claude</option>
+                    <option value="ollama">🟣 Ollama</option>
+                </select>
+            </div>
+
+            <form id="chatForm" class="input-form">
+                <button type="button" id="uploadBtn" class="icon-btn" title="إرفاق ملف">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                </button>
+                <button type="button" id="micBtn" class="icon-btn mic-btn" title="تحدث">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line><line x1="8" y1="22" x2="16" y2="22"></line></svg>
+                </button>
+                <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.txt,.csv,.xlsx,.xls,.png,.jpg,.jpeg">
+                
+                <textarea id="messageInput" placeholder="اكتب رسالتك هنا... (أو اسحب وأفلت ملفاً)" rows="1" dir="auto"></textarea>
+                
+                <button type="button" id="compareBtn" class="icon-btn compare-toggle-btn" title="وضع المقارنة">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+
+                <button type="submit" id="sendBtn" class="primary-btn icon-btn" title="إرسال">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(180deg);"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        </footer>
+    </div>
+
+    <!-- Template for Typing Indicator -->
+    <template id="typingTemplate">
+        <div class="message bot typing-message">
+            <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"></path><rect x="4" y="8" width="16" height="12" rx="2"></rect></svg></div>
+            <div class="bubble glass-bubble">
+                <div class="typing-indicator">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

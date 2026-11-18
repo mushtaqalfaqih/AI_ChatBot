@@ -1,0 +1,34 @@
+# Environments
+.venv/
+venv/
+env/
+ENV/
+*.env
+!.env.example
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases & vector store
+data/*.db
+data/chroma_db/
+*.sqlite3
+
+# Uploads & temporary runtime files
+uploads/*
+!uploads/.gitkeep
+logs/
+*.log
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
